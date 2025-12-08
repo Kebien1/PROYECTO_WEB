@@ -1,0 +1,85 @@
+<?php
+// Archivo: includes/mail_functions.php
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../config/email.php';
+
+function enviarEmail($destinatario, $nombre_destinatario, $asunto, $mensaje_html) {
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Configuración del servidor
+        $mail->isSMTP();
+        $mail->Host = EMAIL_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = EMAIL_USERNAME;
+        $mail->Password = EMAIL_PASSWORD;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = EMAIL_PORT;
+        $mail->CharSet = 'UTF-8';
+        
+        // Remitente
+        $mail->setFrom(EMAIL_FROM, EMAIL_FROM_NAME);
+        
+        // Destinatario
+        $mail->addAddress($destinatario, $nombre_destinatario);
+        
+        // Contenido
+        $mail->isHTML(true);
+        $mail->Subject = $asunto;
+        $mail->Body = $mensaje_html;
+        
+        // Enviar
+        $mail->send();
+        return true;
+        
+    } catch (Exception $e) {
+        error_log("Error al enviar email: {$mail->ErrorInfo}");
+        return false;
+    }
+}
+
+// Función específica para código de verificación
+function enviarCodigoVerificacion($email, $nombre, $codigo, $tipo = 'registro') {
+    $asunto = ($tipo == 'registro') 
+        ? "Código de Verificación - PrograWeb" 
+        : "Código de Acceso - PrograWeb";
+    
+    $mensaje = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+            .container { background-color: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .codigo { font-size: 36px; font-weight: bold; color: #667eea; text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin: 20px 0; letter-spacing: 5px; }
+            .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h1>🔐 PrograWeb</h1>
+                <p>" . ($tipo == 'registro' ? 'Verificación de Cuenta' : 'Código de Acceso') . "</p>
+            </div>
+            <p>Hola <strong>$nombre</strong>,</p>
+            <p>Tu código de verificación es:</p>
+            <div class='codigo'>$codigo</div>
+            <p style='text-align: center; color: #666;'>Este código es válido por 15 minutos</p>
+            <p>Si no solicitaste este código, puedes ignorar este mensaje.</p>
+            <div class='footer'>
+                <p>Este es un correo automático, por favor no responder.</p>
+                <p>&copy; 2024 PrograWeb - Sistema de Gestión</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+    
+    return enviarEmail($email, $nombre, $asunto, $mensaje);
+}
+?>
