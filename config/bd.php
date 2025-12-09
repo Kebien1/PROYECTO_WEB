@@ -1,11 +1,9 @@
 <?php
-// Archivo: config/bd.php
 $servidor = "localhost";
 $basededatos = "prograweb";
 $usuario = "root";
 $clave = "";
 
-// RUTA BASE: Ajusta "actividad_1" si tu carpeta tiene otro nombre en htdocs
 $base_url = "http://localhost/actividad_1/";
 
 try {

@@ -1,10 +1,12 @@
 <?php
-// Archivo: login.php
+// Archivo: modules/auth/login.php
 session_start();
-include("config/bd.php");
+// Ajuste de ruta: Subimos 2 niveles para encontrar config
+include("../../config/bd.php");
 
 if(isset($_SESSION['usuario_id'])){
-    header("Location: modules/usuarios/index.php");
+    // Ajuste de ruta: Subimos 2 niveles para ir a usuarios
+    header("Location: ../../modules/usuarios/index.php");
     exit;
 }
 
@@ -32,9 +34,11 @@ if($_POST){
                 $_SESSION['codigo_login'] = $codigo_verificacion;
                 $_SESSION['usuario_login_temp'] = $usuario;
                 
-                require_once("includes/mail_functions.php");
+                // Ajuste de ruta: mail_functions está en includes (2 niveles arriba)
+                require_once("../../includes/mail_functions.php");
 
                 if(enviarCodigoVerificacion($usuario['Email'], $usuario['Nick'], $codigo_verificacion, 'login')){
+                    // Misma carpeta, ruta directa
                     header("Location: verify_login.php");
                     exit;
                 } else {

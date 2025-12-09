@@ -1,11 +1,13 @@
 <?php
-// Archivo: register.php
+// Archivo: modules/auth/register.php
 session_start();
-include("config/bd.php");
-require_once("includes/mail_functions.php");
+// Ajuste de ruta: ../../
+include("../../config/bd.php");
+require_once("../../includes/mail_functions.php");
 
 if(isset($_SESSION['usuario_id'])){
-    header("Location: modules/usuarios/index.php");
+    // Ajuste de ruta: ../../
+    header("Location: ../../modules/usuarios/index.php");
     exit;
 }
 
@@ -49,6 +51,7 @@ if($_POST){
                 $_SESSION['nick_verificacion'] = $nick;
                 
                 if(enviarCodigoVerificacion($email, $nick, $codigo_verificacion, 'registro')){
+                    // Misma carpeta, ruta directa
                     header("Location: verify.php");
                     exit;
                 } else {

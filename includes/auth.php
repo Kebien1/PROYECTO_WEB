@@ -3,7 +3,8 @@
 session_start();
 
 if(!isset($_SESSION['usuario_id'])){
-    header("Location: " . $base_url . "login.php");
+    // Ruta corregida al login en modules/auth
+    header("Location: " . $base_url . "modules/auth/login.php");
     exit;
 }
 

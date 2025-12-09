@@ -40,7 +40,7 @@ include_once(__DIR__ . "/auth.php");
                                 <i class="bi bi-person-circle me-1"></i> <?php echo $_SESSION['usuario_nick']; ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item text-danger" href="<?php echo $base_url; ?>logout.php"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                                <li><a class="dropdown-item text-danger" href="<?php echo $base_url; ?>modules/auth/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
                             </ul>
                         </li>
                     </ul>

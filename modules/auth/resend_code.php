@@ -1,7 +1,8 @@
 <?php
-// Archivo: resend_code.php
+// Archivo: modules/auth/resend_code.php
 session_start();
-include("config/bd.php");
+// Ajuste de ruta: ../../
+include("../../config/bd.php");
 
 if(!isset($_SESSION['email_verificacion'])){
     header("Location: register.php");
