@@ -1,11 +1,10 @@
 <?php
 // Archivo: modules/auth/login.php
+//
 session_start();
-// Ajuste de ruta: Subimos 2 niveles para encontrar config
 include("../../config/bd.php");
 
 if(isset($_SESSION['usuario_id'])){
-    // Ajuste de ruta: Subimos 2 niveles para ir a usuarios
     header("Location: ../../modules/usuarios/index.php");
     exit;
 }
@@ -28,17 +27,13 @@ if($_POST){
             if($usuario['Estado'] == 0){
                 $error = "Tu cuenta aún no ha sido verificada. Por favor revisa tu correo.";
             } else {
-                // Generar código de verificación para el login
                 $codigo_verificacion = sprintf("%06d", mt_rand(1, 999999));
-                
                 $_SESSION['codigo_login'] = $codigo_verificacion;
                 $_SESSION['usuario_login_temp'] = $usuario;
                 
-                // Ajuste de ruta: mail_functions está en includes (2 niveles arriba)
                 require_once("../../includes/mail_functions.php");
 
                 if(enviarCodigoVerificacion($usuario['Email'], $usuario['Nick'], $codigo_verificacion, 'login')){
-                    // Misma carpeta, ruta directa
                     header("Location: verify_login.php");
                     exit;
                 } else {
@@ -95,9 +90,13 @@ if($_POST){
                             <label for="floatingInput">Nombre de Usuario</label>
                         </div>
                         
-                        <div class="form-floating mb-4">
+                        <div class="form-floating mb-2">
                             <input type="password" class="form-control rounded-3" id="floatingPassword" name="Password" placeholder="Contraseña" required>
                             <label for="floatingPassword">Contraseña</label>
+                        </div>
+
+                        <div class="text-end mb-4">
+                            <a href="recuperar.php" class="text-decoration-none small text-muted">¿Olvidaste tu contraseña?</a>
                         </div>
                         
                         <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">

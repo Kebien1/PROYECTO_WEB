@@ -1,5 +1,6 @@
 <?php
 // Archivo: includes/mail_functions.php
+//
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -75,6 +76,46 @@ function enviarCodigoVerificacion($email, $nombre, $codigo, $tipo = 'registro') 
                 <p>Este es un correo automático, por favor no responder.</p>
                 <p>&copy; 2024 PrograWeb - Sistema de Gestión</p>
             </div>
+        </div>
+    </body>
+    </html>
+    ";
+    
+    return enviarEmail($email, $nombre, $asunto, $mensaje);
+}
+
+// --- NUEVA FUNCIÓN AGREGADA PARA RECUPERACIÓN ---
+function enviarEmailRecuperacion($email, $nombre, $link) {
+    $asunto = "Recuperar Contraseña - PrograWeb";
+    
+    $mensaje = "
+    <!DOCTYPE html>
+    <html lang='es'>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+            .container { background-color: #ffffff; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 20px; margin-bottom: 20px; }
+            .btn { background-color: #ffc107; color: #000; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 20px; }
+            .footer { margin-top: 30px; font-size: 12px; color: #6c757d; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2 style='margin:0;'>🔐 Recuperación de Cuenta</h2>
+            </div>
+            <p>Hola <strong>$nombre</strong>,</p>
+            <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+            <p>Haz clic en el botón para continuar:</p>
+            
+            <div style='text-align: center; margin: 30px 0;'>
+                <a href='$link' class='btn'>Restablecer Contraseña</a>
+            </div>
+            
+            <p style='color: #666; font-size: 14px;'>Este enlace es válido por 1 hora.</p>
+            <div class='footer'>PrograWeb Sistema</div>
         </div>
     </body>
     </html>

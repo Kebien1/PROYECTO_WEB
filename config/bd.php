@@ -4,7 +4,7 @@ $basededatos = "prograweb";
 $usuario = "root";
 $clave = "";
 
-$base_url = "http://localhost/actividad_1/";
+$base_url = "http://172.25.3.35/actividad_1/";
 
 try {
     $conexion = new PDO("mysql:host=$servidor;dbname=$basededatos", $usuario, $clave);
