@@ -1,5 +1,4 @@
 <?php
-// Archivo: includes/auth.php
 // Este archivo verifica que el usuario esté logueado
 session_start();
 
