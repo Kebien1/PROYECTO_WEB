@@ -1,117 +1,87 @@
 <?php
 // Archivo: modules/auth/login.php
-//
 session_start();
 include("../../config/bd.php");
+require_once("../../includes/mail_functions.php");
 
 if(isset($_SESSION['usuario_id'])){
-    header("Location: ../../modules/usuarios/index.php");
+    header("Location: ../../index.php");
     exit;
 }
 
-$error = "";
+$mensaje = "";
 
 if($_POST){
     $nick = $_POST["Nick"] ?? "";
     $password = $_POST["Password"] ?? "";
     
-    if($nick != "" && $password != ""){
-        $sentencia = $conexion->prepare("SELECT * FROM usuario WHERE Nick = :nick AND Password = :password");
-        $sentencia->bindParam(":nick", $nick);
-        $sentencia->bindParam(":password", $password);
-        $sentencia->execute();
+    // 1. Buscar usuario
+    $sentencia = $conexion->prepare("SELECT * FROM usuario WHERE Nick = :nick AND Password = :password");
+    $sentencia->bindParam(":nick", $nick);
+    $sentencia->bindParam(":password", $password);
+    $sentencia->execute();
+    $usuario = $sentencia->fetch(PDO::FETCH_ASSOC);
+    
+    if($usuario){
+        // 2. Si las credenciales son buenas, generamos el CÓDIGO
+        $codigo = sprintf("%06d", mt_rand(1, 999999)); // Genera número ej: 458921
         
-        $usuario = $sentencia->fetch(PDO::FETCH_ASSOC);
+        // 3. Guardamos datos temporalmente (NO iniciamos sesión completa aún)
+        $_SESSION['login_temp_user'] = $usuario;
+        $_SESSION['login_codigo'] = $codigo;
         
-        if($usuario){
-            if($usuario['Estado'] == 0){
-                $error = "Tu cuenta aún no ha sido verificada. Por favor revisa tu correo.";
-            } else {
-                $codigo_verificacion = sprintf("%06d", mt_rand(1, 999999));
-                $_SESSION['codigo_login'] = $codigo_verificacion;
-                $_SESSION['usuario_login_temp'] = $usuario;
-                
-                require_once("../../includes/mail_functions.php");
-
-                if(enviarCodigoVerificacion($usuario['Email'], $usuario['Nick'], $codigo_verificacion, 'login')){
-                    header("Location: verify_login.php");
-                    exit;
-                } else {
-                    $error = "Error al enviar el código. Intenta nuevamente.";
-                }
-            }
+        // 4. Enviamos el código al correo
+        if(enviarCodigoVerificacion($usuario['Email'], $usuario['Nick'], $codigo)){
+            header("Location: verify_login.php"); // Vamos a la pantalla de código
+            exit;
         } else {
-            $error = "Usuario o contraseña incorrectos.";
+            $mensaje = "Error al enviar el código de verificación.";
         }
     } else {
-        $error = "Por favor complete todos los campos.";
+        $mensaje = "Usuario o contraseña incorrectos.";
     }
 }
 ?>
 <!doctype html>
 <html lang="es">
 <head>
-    <title>Login - PrograWeb</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <title>Login - Seguridad</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-<body class="bg-light">
-    
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="col-md-5 col-lg-4">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-5">
-                    
-                    <div class="text-center mb-4">
-                        <i class="bi bi-layers-fill text-primary display-4"></i>
-                        <h2 class="fw-bold mt-2">Bienvenido</h2>
-                        <p class="text-muted">Ingresa tus credenciales para continuar</p>
-                    </div>
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+    <div class="card shadow border-0 rounded-4" style="width: 100%; max-width: 400px;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-circle display-4 text-primary"></i>
+                <h3 class="fw-bold mt-3">Iniciar Sesión</h3>
+            </div>
+            
+            <?php if($mensaje) { ?>
+                <div class="alert alert-danger text-center small"><?php echo $mensaje; ?></div>
+            <?php } ?>
 
-                    <?php if($error != "") { ?>
-                        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                            <i class="bi bi-exclamation-circle-fill me-2"></i> <?php echo $error; ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    <?php } ?>
-                    
-                    <?php if(isset($_GET['verificado'])) { ?>
-                        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i> Cuenta verificada. Inicia sesión.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    <?php } ?>
-                    
-                    <form action="" method="post">
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control rounded-3" id="floatingInput" name="Nick" placeholder="Usuario" required autofocus>
-                            <label for="floatingInput">Nombre de Usuario</label>
-                        </div>
-                        
-                        <div class="form-floating mb-2">
-                            <input type="password" class="form-control rounded-3" id="floatingPassword" name="Password" placeholder="Contraseña" required>
-                            <label for="floatingPassword">Contraseña</label>
-                        </div>
-
-                        <div class="text-end mb-4">
-                            <a href="recuperar.php" class="text-decoration-none small text-muted">¿Olvidaste tu contraseña?</a>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
-                            <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
-                        </button>
-                    </form>
-                    
-                    <div class="text-center mt-4">
-                        <p class="text-muted mb-0">¿No tienes cuenta? <a href="register.php" class="text-decoration-none fw-bold">Regístrate aquí</a></p>
-                    </div>
+            <form action="" method="post">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" name="Nick" placeholder="Usuario" required>
+                    <label>Usuario</label>
                 </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" name="Password" placeholder="Contraseña" required>
+                    <label>Contraseña</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold mb-3">Ingresar</button>
+            </form>
+            
+            <div class="text-center">
+                <a href="recuperar.php" class="text-decoration-none small">¿Olvidaste tu contraseña?</a><br>
+                <a href="register.php" class="text-decoration-none small text-secondary">Registrarse</a><br>
+                <hr>
+                <a href="../../index.php" class="btn btn-sm btn-outline-secondary">Volver al Inicio</a>
             </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

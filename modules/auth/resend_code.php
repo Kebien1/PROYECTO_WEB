@@ -1,5 +1,5 @@
 <?php
-// Archivo: modules/auth/resend_code.php
+
 session_start();
 // Ajuste de ruta: ../../
 include("../../config/bd.php");
